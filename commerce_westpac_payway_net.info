@@ -5,8 +5,4 @@ dependencies[] = commerce
 dependencies[] = commerce_payment
 dependencies[] = rules
 core = 7.x
-
-version = "7.x-1.x-dev"
-core = "7.x"
-project = "commerce_westpac_payway_net"
-
+project = "commerce"
