@@ -17,15 +17,10 @@ function commerce_westpac_payway_net_menu() {
     'type' => MENU_CALLBACK,
     'access arguments' => array('access content'),
   );
-}
-
-function commerce_westpac_payway_net_form_alter($form) {
-  error_log($form['#form_id']);
-  //dpm($form_id, 'form id');
+  return $items;
 }
 
 /**
- * MODULE INFO
  * Implements hook_commerce_payment_method_info().
  */
 function commerce_westpac_payway_net_commerce_payment_method_info() {
@@ -44,7 +39,6 @@ function commerce_westpac_payway_net_commerce_payment_method_info() {
 }
 
 /**
- * MODULE SETTINGS
  * Payment method callback: settings form.
  */
 function commerce_westpac_payway_net_settings_form($settings = NULL) {
@@ -128,38 +122,6 @@ function commerce_westpac_payway_net_settings_form($settings = NULL) {
 }
 
 /**
- * EXTRA FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE WESTPAC PAYWAY NET PAYMENT METHOD
- * Payment method callback: submit form.
- */
-function commerce_westpac_payway_net_submit_form($payment_method, $pane_values, $checkout_pane, $order) {
-  $form = array();
-  // Merge in values from the order.
-  if (!empty($order->data['commerce_westpac_payway_net'])) {
-    $pane_values += $order->data['commerce_westpac_payway_net'];
-  }
-  return $form;
-}
-
-/**
- * VALIDATION OF FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE THIS PAYMENT METHOD
- * Payment method callback: submit form validation.
- */
-function commerce_westpac_payway_net_submit_form_validate($payment_method, $pane_form, $pane_values, $order, $form_parents = array()) {
-  dpm('generating token');
-}
-
-/**
- * CALLBACK FOR FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE THIS PAYMENT METHOD -> SENDS TO COMMERCE TRANSACTION
- * Payment method callback: submit form submission.
- */
-function commerce_westpac_payway_net_submit_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
-  dpm('token generated');
-
-  $order->data['commerce_westpac_payway_net'] = $pane_values;
-  commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $pane_values['name']);
-}
-
-/**
  * THIS FORM GETS SUBMITTED TO WESTPAC HOSTED PAYMENT PAGE
  * Payment method callback: redirect form to nab hosted payments page gateway.
  */
@@ -171,7 +133,6 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
   $return_link_url = url($return_link_url, array('absolute' => TRUE));
   $payway_base_url = $payment_method['settings']['commerce_westpac_payway_net_payWayBaseUrl'];
   $biller_code = $payment_method['settings']['commerce_westpac_payway_net_billerCode'];
-
   $token_variables = array(
     'payway_url'        => $payway_base_url,
     'payment_reference' => $order->order_id,
@@ -191,47 +152,14 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
   try {
     $token = _commerce_westpac_payway_net_get_token($token_variables);
     $url = $payway_base_url .
-      'MakePayment?biller_code=' . $biller_code .
+      'MakePayment?biller_code=' . $biller_code . 
       '&token=' . $token;
     drupal_goto($url);
   }
   catch (Exception $e) {
-    form_set_error('Unable to communicate with PayWay Net payment gateway.');
+    form_set_error('Unable to communicate with PayWay Net payment gateway.');    
   }
   return $form;
-}
-
-/**
- * VALIDATES THE FORM SUBMITTED TO WESTPAC
- * Payment validate: this service doesn't provide any redirect for error or fail transactions
- * The module does nothing with these at this point. The will stay at checkout order state.
- */
-function commerce_westpac_payway_net_redirect_form_validate($order, $payment_method) {
-  dpm(__LINE__, __FUNCTION__);
-  module_load_include('inc', 'commerce_westpac_payway_net');
-  $return_link_url = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array(), array('absolute' => TRUE));
-/*
-  // Throw an error if a long enough name was not provided.
-  if (strlen($pane_values['phone']) < 6) {
-    form_set_error(implode('][', array_merge($form_parents, array('name'))), t('You must enter a phone number 6 or more characters long.'));
-    // Even though the form error is enough to stop the submission of the form,
-    // it's not enough to stop it from a Commerce standpoint because of the
-    // combined validation / submission going on per-pane in the checkout form.
-    return FALSE;
-  }
-*/
-
-  // dpm(debug_backtrace());
-  commerce_nab_hosted_payment_callback_handler();
-  commerce_nab_hosted_payment_status_update($order);
-  commerce_nab_hosted_payment_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_SUCCESS);
-  commerce_payment_redirect_pane_next_page($order);
-  return TRUE;
-}
-
-function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
-  dpm(__LINE__, __FUNCTION__);
-
 }
 
 /**
@@ -247,7 +175,7 @@ function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane
  *   The name entered on the submission form.
  */
 function commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $name) {
-  dpm(__LINE__, __FUNCTION__);
+  error_log(__FUNCTION__);
   $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
   $transaction->instance_id = $payment_method['instance_id'];
   $transaction->amount = $charge['amount'];
@@ -429,3 +357,109 @@ function commerce_westpac_payway_net_status_update($order) {
     $order = commerce_order_status_update($order, 'req_fin_confirm');
   }
 }
+
+/**
+ * VALIDATES THE FORM SUBMITTED TO WESTPAC
+ * Payment validate: this service doesn't provide any redirect for error or fail transactions
+ * The module does nothing with these at this point. The will stay at checkout order state.
+ */
+function commerce_westpac_payway_net_redirect_form_validate($order, $payment_method) {
+  error_log(__FUNCTION__);
+//  dpm(__LINE__, __FUNCTION__);
+/*
+  module_load_include('inc', 'commerce_westpac_payway_net');
+  $return_link_url = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array(), array('absolute' => TRUE));
+*/
+/*
+  // Throw an error if a long enough name was not provided.
+  if (strlen($pane_values['phone']) < 6) {
+    form_set_error(implode('][', array_merge($form_parents, array('name'))), t('You must enter a phone number 6 or more characters long.'));
+    // Even though the form error is enough to stop the submission of the form,
+    // it's not enough to stop it from a Commerce standpoint because of the
+    // combined validation / submission going on per-pane in the checkout form.
+    return FALSE;
+  }
+*/
+  // dpm(debug_backtrace());
+/*
+  commerce_nab_hosted_payment_callback_handler();
+  commerce_nab_hosted_payment_status_update($order);
+  commerce_nab_hosted_payment_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_SUCCESS);
+  commerce_payment_redirect_pane_next_page($order);
+  return TRUE;
+*/
+}
+
+/*
+function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
+  dpm(__LINE__, __FUNCTION__);
+
+}
+*/
+
+
+/**
+ * EXTRA FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE WESTPAC PAYWAY NET PAYMENT METHOD
+ * Payment method callback: submit form.
+ */
+function commerce_westpac_payway_net_submit_form($payment_method, $pane_values, $checkout_pane, $order) {
+  $form = array();
+  // Merge in values from the order.
+  if (!empty($order->data['commerce_westpac_payway_net'])) {
+    $pane_values += $order->data['commerce_westpac_payway_net'];
+  }
+  return $form;
+}
+
+/**
+ * VALIDATION OF FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE THIS PAYMENT METHOD
+ * Payment method callback: submit form validation.
+ */
+function commerce_westpac_payway_net_submit_form_validate($payment_method, $pane_form, $pane_values, $order, $form_parents = array()) {
+
+}
+
+/**
+ * CALLBACK FOR FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE THIS PAYMENT METHOD -> SENDS TO COMMERCE TRANSACTION
+ * Payment method callback: submit form submission.
+ */
+function commerce_westpac_payway_net_submit_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
+  $order->data['commerce_westpac_payway_net'] = $pane_values;
+  commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $pane_values['name']);
+}
+
+/**
+ * Saves the details for the successful transaction
+ */
+/*
+    function commerce_westpac_payway_net_transaction($payment_method, $order, $transaction_status) {
+      dpm($order);
+      dpm($payment_method);
+      dpm($transaction_status);
+      $query_data = commerce_nab_hosted_payment_callback_handler();
+
+      $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
+      $transaction->instance_id = $payment_method['instance_id'];
+      $transaction->remote_id = $query_data['commerce_nab_ret_bank_ref'];
+      $transaction->amount = $query_data['commerce_nab_ret_bank_amt'];
+      $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+      $transaction->message = $query_data['commerce_nab_ret_bank_num'];
+
+      commerce_payment_transaction_save($transaction);
+    }
+*/
+
+/**
+ * URL RECEIVING THE DATA COMING BACK FROM WESTPAC
+ * return callback - Implements hook_menu().
+ */
+/*
+  function commerce_westpac_payway_net_menu() {
+    $items['checkout/%/payment/return/%'] = array(
+      'title' => t('Callback handler'),
+      'page callback' => 'commerce_westpac_payway_net_callback_handler',
+      'callback arguments' => array(1, 4),
+      'type' => MENU_CALLBACK,
+    );
+  }
+  */
