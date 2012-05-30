@@ -2,7 +2,8 @@
 
 /**
  * Get PayWay Net token.
- *   Cribbed from http://github.com/GiantRobot/uc_payway_net/
+ *
+ * Based on http://github.com/GiantRobot/uc_payway_net/
  */
 function _commerce_westpac_payway_net_get_token($parameters) {
   $cert_file = $parameters['cert_path'];
@@ -74,4 +75,44 @@ function _commerce_westpac_payway_net_get_token($parameters) {
   else {
     return $rsp_parameters['token'];
   }
+}
+
+/**
+ *
+ */
+function _commerce_payway_net_decrypt_parameters($encrytion_key, $encrypted_text, $signature) {
+  $key = base64_decode($encrytion_key);
+  $iv = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+  $td = mcrypt_module_open('rijndael-128', '', 'cbc', '');
+  // Decrypt the parameter text
+  mcrypt_generic_init($td, $key, $iv);
+  $text = mdecrypt_generic($td, base64_decode($encrypted_text));
+  $text = _commerce_payway_net_pkcs5_unpad($text);
+  mcrypt_generic_deinit($td);
+  // Decrypt the signature value
+  mcrypt_generic_init($td, $key, $iv);
+  $hash = mdecrypt_generic($td, base64_decode($signature));
+  $hash = bin2hex(_commerce_payway_net_pkcs5_unpad($hash));
+  mcrypt_generic_deinit($td);
+  mcrypt_module_close($td);
+  // Compute the MD5 hash of the parameters
+  $text_hash = md5($text);
+  // Check the provided MD5 hash against the computed one
+  if ($text_hash != $hash) {
+    trigger_error("Invalid parameters signature");
+  }
+  $params = array();
+  // Loop through each parameter provided
+  foreach (explode( "&", $text ) as $parameter) {
+    list($name, $value) = explode("=", $parameter);
+    $params[urldecode($name)] = urldecode($value);
+  }
+  return $params;
+}
+
+function _commerce_payway_net_pkcs5_unpad($text) {
+  $pad = ord($text{strlen($text)-1});
+  if ($pad > strlen($text)) return false;
+  if (strspn($text, chr($pad), strlen($text) - $pad) != $pad) return false;
+  return substr($text, 0, -1 * $pad);
 }
