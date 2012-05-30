@@ -10,11 +10,12 @@
  * Implements hook_menu().
  */
 function commerce_westpac_payway_net_menu() {
-  $items['westpac-payway-net-server-response'] = array(
+  $items['checkout/payway_net_notify'] = array(
     'title' => t('Callback handler'),
-    'page callback' => 'commerce_westpac_payway_net_callback_handler',
+    'page callback' => 'commerce_westpac_payway_net_notify_handler',
     'callback arguments' => array(1, 4),
     'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
   );
 }
 
@@ -258,53 +259,126 @@ function commerce_westpac_payway_net_transaction($payment_method, $order, $charg
 }
 
 /**
- * Saves the details for the successful transaction
+ * Notify handler.
+ *
+ * Receives POST from PayWay Net with transaction details (encrypted).
  */
-/*
-    function commerce_westpac_payway_net_transaction($payment_method, $order, $transaction_status) {
-      dpm($order);
-      dpm($payment_method);
-      dpm($transaction_status);
-      $query_data = commerce_nab_hosted_payment_callback_handler();
-
-      $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
-      $transaction->instance_id = $payment_method['instance_id'];
-      $transaction->remote_id = $query_data['commerce_nab_ret_bank_ref'];
-      $transaction->amount = $query_data['commerce_nab_ret_bank_amt'];
-      $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
-      $transaction->message = $query_data['commerce_nab_ret_bank_num'];
-
-      commerce_payment_transaction_save($transaction);
-    }
-*/
-
-/**
- * URL RECEIVING THE DATA COMING BACK FROM WESTPAC
- * return callback - Implements hook_menu().
- */
-/*
-  function commerce_westpac_payway_net_menu() {
-    $items['checkout/%/payment/return/%'] = array(
-      'title' => t('Callback handler'),
-      'page callback' => 'commerce_westpac_payway_net_callback_handler',
-      'callback arguments' => array(1, 4),
-      'type' => MENU_CALLBACK,
-    );
-  }
-  */
-
-/**
- * CALL:BACK FUNCTION HANDLING THE DATA COMING BACK FROM WESTPAC
- * Callback handler, interprets query info in the successful payment return url which the bank hits.
- */
-function commerce_westpac_payway_net_callback_handler() {
+function commerce_westpac_payway_net_notify_handler() {
+  error_log(__FUNCTION__);
+  error_log('POST: '.print_r($_POST,1));
+  error_log('REQUEST: '.print_r($_REQUEST,1));
+  error_log('ARGS: '.print_r(func_get_args(),1));
   parse_str($_SERVER['QUERY_STRING'], $data);
-  //dpm($data);
+
+  // ensure we have a payment reference
+  if (empty($_POST['payment_reference'])) {
+    // no payment reference supplied,
+    // return access denied & log error
+  
+  }
+  // ensure we have a transaction
+  if (!$trans = commerce_payment_transaction_load($_POST['payment_reference'])) {
+    // no transaction found for supplied reference
+    // return access denied & log error
+    
+  }
+  // authenticate request from payway net
+  // (we need transaction->payment_method[details] to match)
+  error_log('TRANS: '.print_r($trans,1));
+  watchdog('commerce_payway_net', 'Transaction:<pre>!trans</pre>', array('!trans' => print_r($trans,1)), WATCHDOG_DEBUG);
+  watchdog('payway_net', 'Transaction:<pre>!trans</pre>', array('!trans' => print_r($trans,1)), WATCHDOG_DEBUG);
+
   $query_data = array(
     'commerce_westpac_payway_net_ret_bank_ref' => $data['bank_reference'],
     'commerce_westpac_payway_net_ret_bank_amt' => round($data['payment_amount']*100, 0),
     'commerce_westpac_payway_net_ret_bank_num' => $data['payment_number'],
   );
+  $post = print_r($_POST,1);  
+  watchdog('commerce_payway_net', 'Notification: <pre>!dbg</pre>', array('!dbg' => $post), WATCHDOG_DEBUG);
+  error_log(print_r($_POST,1));
+
+  global $user;
+  $workstring = 'cmd=_notify-validate';
+  $i = 1;
+  // @TODO: This foreach() does ... nothing at all?
+  foreach ($_POST as $key => $value) {
+    if (get_magic_quotes_gpc()) {
+      // Fix issue with magic quotes.
+      $value = stripslashes($value);
+    }
+
+    // @TODO eregi() is deprecated in PHP5, replace.
+    if (!eregi("^[_0-9a-z-]{1,30}$", $key) || !strcasecmp($key, 'cmd')) {
+      unset($key);
+      unset($value);
+    }
+  }
+
+  $param_string = "";
+  foreach ($_POST as $name => $value) {
+    $params[$name] = $value;
+    if ($name != "username" && $name != "password") {
+      $param_string .= "$name=$value;";
+    }
+  }
+  foreach ($_GET as $name => $value) {
+    $params[$name] = $value;
+    if ($name != "username" && $name != "password") {
+      $param_string .= "$name=$value;";
+    }
+  }
+
+  // Verify this is coming from PayWay Net
+  // @TODO Need to get user/pass from Commerce payment method
+  // (not a variable - Commerce supports multiple instances,
+  // so we need to get from the order)
+  if ($params['username'] != variable_get('uc_payway_net_security_username', '')
+       || $params['password'] != variable_get('uc_payway_net_security_password', '')) {
+    // Usually this means you haven't configured your
+    // security username and security password correctly in
+    // Ubercart PayWay Net module configuration.
+    //
+    // If your settings are exactly right, someone's trying
+    // to send a fraudulent payment notification.
+    watchdog('commerce_westpac_payway_net', 'Denied access to PayWay Net notification endpoint.', array(), WATCHDOG_ERROR);
+    drupal_access_denied();
+  }
+  else {
+    // Unsure why PayWay Net returns the amount with a thousands separator,
+    // but there you have it.
+    $params['am_payment'] = str_replace(',', '', $params['am_payment']);
+    watchdog('commerce_westpac_payway_net', 'Params: <pre>!params</pre>', array('!params' => print_r($params,1)), WATCHDOG_DEBUG);
+    $order_id = trim($params['payment_reference']);
+    if ($order = uc_order_load($order_id)) {
+      watchdog('commerce_westpac_payway_net', 'Order (notify): <pre>!order</pre>', array('!order' => print_r($order,1)), WATCHDOG_DEBUG);
+      if ($params['fl_success'] == '1') {
+        $comment = t('Payway Net payment_reference: @payment_reference', array('@payment_reference' => $params['payment_reference']));
+        $targs = array(
+          '@amount' => $params['am_payment'],
+          '@order_id' => $order_id,
+          '!order_link' => l('order #' . $order_id, 'admin/store/orders/' . $order_id),
+        );
+        watchdog('uc_payway_net', 'Payment of $@amount reported by PayWay Net for !order_link', $targs, WATCHDOG_INFO);
+        //uc_order_comment_save($order_id, $user->uid, t('Payment of @amount submitted via PayWay Net.', $targs), 'admin', 'payment_received  ');
+        //uc_order_comment_save($order_id, $user->uid, t('PayWay Net reported a payment of @amount.', $targs), 'order', 'payment_received');
+        //uc_payment_enter($order_id, 'payway_net', $params['am_payment'], $order->uid, array(), $comment);
+        //uc_cart_complete_sale($order);
+      }
+      else {
+        watchdog('commerce_westpac_payway_net', 'Payment failure reported by PayWay Net for order @order_id', array('@order_id' => $order_id), WATCHDOG_ERROR);
+        //uc_order_comment_save($order_id, $user->uid, t("Attempted payment failed for order @payment_reference.", array('@payment_reference' => $order_id)), 'order');
+      }
+      // Tell PayWay that everything's fine.
+      return "Success";
+    }
+    else {
+      // If error results, return HTTP 500.
+      watchdog('commerce_westpac_payway_net', 'Received notification from PayWay Net, but unable to load order with ID %oid.', array('!oid' => $params['payment_reference']), WATCHDOG_ERROR);
+      drupal_add_http_header('Status', '503 Unable to locate order for update');
+      die("Error: Unable to locate order for update.");
+    }
+  }
+
   return $query_data;
 }
 
