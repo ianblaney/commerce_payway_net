@@ -2,20 +2,16 @@
 
 /**
  * @file
- * Provides a Payway Net payment method for Drupal Commerce 
+ * Provides a Payway Net payment method for Drupal Commerce
  *
  */
-
 
 /**
  * MODULE INFO
  * Implements hook_commerce_payment_method_info().
  */
-
 function commerce_westpac_payway_net_commerce_payment_method_info() {
-
 	$payment_methods = array();
-
 	$payment_methods['commerce_westpac_payway_net'] = array(
 		'title' => t('Pay by credit card via Westpac PayWay Net'),
 		'short_title' => t('Pay by credit card via Westpac PayWay Net'),
@@ -24,22 +20,17 @@ function commerce_westpac_payway_net_commerce_payment_method_info() {
 		'active' => TRUE,
 		'offsite' => TRUE,
 	);
-
 	return $payment_methods;
-	
 }
-
 
 /**
  * MODULE SETTINGS
  * Payment method callback: settings form.
  */
-
 function commerce_westpac_payway_net_settings_form($settings = NULL) {
   $form = array();
   $settings = (array) $settings + array(
 	'commerce_westpac_payway_net_encryptionKey' => '',
-
 	'commerce_westpac_payway_net_billerCode' => '',
 	'commerce_westpac_payway_net_username' => '',
 	'commerce_westpac_payway_net_password' => '',
@@ -48,95 +39,86 @@ function commerce_westpac_payway_net_settings_form($settings = NULL) {
 	'commerce_westpac_payway_net_paypalEmail' => 'test@example.com',
 	'commerce_westpac_payway_net_payWayBaseUrl' => 'https://www.payway.com.au/',
   );
-$form['commerce_westpac_payway_net_encryptionKey'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Encryption Key'),
-  '#size' => 80,
-  '#description' => t('eg. 123456789'),
-  '#default_value' => $settings['commerce_westpac_payway_net_encryptionKey'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_billerCode'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Biller Code'),
-  '#size' => 80,
-  '#description' => t('eg. 123456'),
-  '#default_value' => $settings['commerce_westpac_payway_net_billerCode'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_username'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Username'),
-  '#size' => 80,
-  '#description' => t('eg. K12345'),
-  '#default_value' => $settings['commerce_westpac_payway_net_username'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_password'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Password'),
-  '#size' => 80,
-  '#description' => t('eg. abcdefghijk'),
-  '#default_value' => $settings['commerce_westpac_payway_net_password'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_caCertsFile'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Path to cacerts.crt file'),
-  '#size' => 80,
-  '#description' => t('eg. /home/username/dev/certs/cacerts.crt'),
-  '#default_value' => $settings['commerce_westpac_payway_net_caCertsFile'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_merchantId'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Merchant Id'),
-  '#size' => 80,
-  '#description' => t('eg. TEST'),
-  '#default_value' => $settings['commerce_westpac_payway_net_merchantId'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_paypalEmail'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Return link text'),
-  '#size' => 80,
-  '#description' => t('eg. test@example.com'),
-  '#default_value' => $settings['commerce_westpac_payway_net_paypalEmail'],
-  '#required' => TRUE,
-);
-$form['commerce_westpac_payway_net_payWayBaseUrl'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Return link text'),
-  '#size' => 80,
-  '#description' => t('eg. https://www.payway.com.au/'),
-  '#default_value' => $settings['commerce_westpac_payway_net_payWayBaseUrl'],
-  '#required' => TRUE,
-);
-
+  $form['commerce_westpac_payway_net_encryptionKey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Encryption Key'),
+    '#size' => 80,
+    '#description' => t('eg. 123456789'),
+    '#default_value' => $settings['commerce_westpac_payway_net_encryptionKey'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_billerCode'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Biller Code'),
+    '#size' => 80,
+    '#description' => t('eg. 123456'),
+    '#default_value' => $settings['commerce_westpac_payway_net_billerCode'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#size' => 80,
+    '#description' => t('eg. K12345'),
+    '#default_value' => $settings['commerce_westpac_payway_net_username'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Password'),
+    '#size' => 80,
+    '#description' => t('eg. abcdefghijk'),
+    '#default_value' => $settings['commerce_westpac_payway_net_password'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_caCertsFile'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to cacerts.crt file'),
+    '#size' => 80,
+    '#description' => t('eg. /home/username/dev/certs/cacerts.crt'),
+    '#default_value' => $settings['commerce_westpac_payway_net_caCertsFile'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_merchantId'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Merchant Id'),
+    '#size' => 80,
+    '#description' => t('eg. TEST'),
+    '#default_value' => $settings['commerce_westpac_payway_net_merchantId'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_paypalEmail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Return link text'),
+    '#size' => 80,
+    '#description' => t('eg. test@example.com'),
+    '#default_value' => $settings['commerce_westpac_payway_net_paypalEmail'],
+    '#required' => TRUE,
+  );
+  $form['commerce_westpac_payway_net_payWayBaseUrl'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Return link text'),
+    '#size' => 80,
+    '#description' => t('eg. https://www.payway.com.au/'),
+    '#default_value' => $settings['commerce_westpac_payway_net_payWayBaseUrl'],
+    '#required' => TRUE,
+  );
 // dpm($form);
-
   return $form;
 }
-
-
 
 /**
  * EXTRA FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE WESTPAC PAYWAY NET PAYMENT METHOD
  * Payment method callback: submit form.
  */
 function commerce_westpac_payway_net_submit_form($payment_method, $pane_values, $checkout_pane, $order) {
-
-dpm($order);
-dprint_r($order);
-
-
-$form = array();
-
+  dpm($order);
+  dprint_r($order);
+  $form = array();
   // Merge in values from the order.
   if (!empty($order->data['commerce_westpac_payway_net'])) {
     $pane_values += $order->data['commerce_westpac_payway_net'];
   }
-
 /*
 
   // Merge in default values.
@@ -145,28 +127,24 @@ $form = array();
   );
 
 */
-
-$form['name'] = array(
-  '#type' => 'textfield',
-  '#title' => t('Name'),
-  '#default_value' => $pane_values['name'],
-  '#required' => TRUE,
-);
-
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => $pane_values['name'],
+    '#required' => TRUE,
+  );
   $form['phone'] = array(
     '#type' => 'textfield',
     '#title' => t('Phone'),
     '#default_value' => $pane_values['phone'],
     '#required' => TRUE,
   );
-
   $form['email'] = array(
     '#type' => 'textfield',
     '#title' => t('Email'),
     '#default_value' => $pane_values['email'],
     '#required' => TRUE,
   );
-
   return $form;
 }
 
@@ -175,18 +153,13 @@ $form['name'] = array(
  * VALIDATION OF FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE THIS PAYMENT METHOD
  * Payment method callback: submit form validation.
  */
-
-
 function commerce_westpac_payway_net_submit_form_validate($payment_method, $pane_form, $pane_values, $order, $form_parents = array()) {
-	
   // Throw an error if a long enough name was not provided.
   if (strlen($pane_values['phone']) < 6) {
     form_set_error(implode('][', array_merge($form_parents, array('name'))), t('You must enter a phone number 6 or more characters long.'));
-
     // Even though the form error is enough to stop the submission of the form,
     // it's not enough to stop it from a Commerce standpoint because of the
     // combined validation / submission going on per-pane in the checkout form.
-
     return FALSE;
   }
 }
@@ -197,12 +170,9 @@ function commerce_westpac_payway_net_submit_form_validate($payment_method, $pane
  * CALLBACK FOR FORM SHOWN TO CUSTOMER WHEN THEY CHOOSE THIS PAYMENT METHOD -> SENDS TO COMMERCE TRANSACTION
  * Payment method callback: submit form submission.
  */
-
 function commerce_westpac_payway_net_submit_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
-	
   $order->data['commerce_westpac_payway_net'] = $pane_values;
   commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $pane_values['name']);
-
 }
 
 
@@ -211,43 +181,31 @@ function commerce_westpac_payway_net_submit_form_submit($payment_method, $pane_f
  * THIS FORM GETS SUBMITTED TO WESTPAC HOSTED PAYMENT PAGE
  * Payment method callback: redirect form to nab hosted payments page gateway.
  */
-
 function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, $payment_method) {
-
-      $settings = $payment_method['settings'];
-
-      $return = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array('query' => array('payment_amount' => '', 'bank_reference' => '', 'payment_number' => ''), 'absolute' => TRUE));
-
-    $form['#action'] = 'https://www.payway.com.au/MakePayment';
-
+  $settings = $payment_method['settings'];
+  $return = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array('query' => array('payment_amount' => '', 'bank_reference' => '', 'payment_number' => ''), 'absolute' => TRUE));
+  $form['#action'] = 'https://www.payway.com.au/MakePayment';
 // <input type="hidden" name="receipt_address" value="<<EMail>>">
-
 	$form['biller_code'] = array(
   		'#type' => 'hidden',
   		'#value' => $settings['commerce_westpac_payway_net_billerCode'],
 	);
-
 	$form['merchant_id'] = array(
   		'#type' => 'hidden',
   		'#value' => $settings['commerce_westpac_payway_net_merchantId'],
 	);
-
 	$form['paypal_email'] = array(
   		'#type' => 'hidden',
   		'#value' => $settings['commerce_westpac_payway_net_paypalEmail'],
 	);
-	
-	
 	$form['payment_amount_change'] = array(
   		'#type' => 'hidden',
   		'#value' => 'false',
 	);
-
 	$form['payment_amount_text'] = array(
   		'#type' => 'hidden',
   		'#value' => 'Invoice Amount',
 	);
-
 	$form['payment_amount'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Payment amount'),
@@ -258,12 +216,10 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 		'#required' => TRUE,
 		'#attributes' => array('readonly' => 'readonly'),
 	);
-
 	$form['payment_reference_text'] = array(
 		'#type' => 'hidden',
 		'#value' => 'Invoice Number',
 	);
-
 	$form['payment_reference'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Payment reference'),
@@ -272,12 +228,10 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 		'#value' => $order->order_number,
 		'#attributes' => array('readonly' => 'readonly'),
 	);
-
 	$form['information_fields'] = array(
 		'#type' => 'hidden',
 		'#value' => 'Name,Email,Phone',
 	);
-
 	$form['Name'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Name'),
@@ -287,7 +241,6 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 		'#required' => TRUE,
 		'#attributes' => array('readonly' => 'readonly'),
 	);
-
 	$form['Email'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Email'),
@@ -297,7 +250,6 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 		'#required' => TRUE,
 		'#attributes' => array('readonly' => 'readonly'),
 	);
-
 	$form['Phone'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Phone'),
@@ -307,39 +259,26 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 		'#required' => TRUE,
 		'#attributes' => array('readonly' => 'readonly'),
 	);
-	
 	$form['submit'] = array(
 		'#type' => 'submit',
         '#value' => t('Proceed to our Westpac PayWay Net page to make your payment'),
 	);
-	
 	return $form;
-
 }
-
-
-	
-
 
 /**
  * VALIDATES THE FORM SUBMITTED TO WESTPAC
  * Payment validate: this service doesn't provide any redirect for error or fail transactions
  * The module does nothing with these at this point. The will stay at checkout order state.
  */
-
-    function commerce_westpac_payway_net_redirect_form_validate($order, $payment_method) {
-
-      // dpm(debug_backtrace());
-      commerce_nab_hosted_payment_callback_handler();
-      commerce_nab_hosted_payment_status_update($order);
-      commerce_nab_hosted_payment_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_SUCCESS);
-      commerce_payment_redirect_pane_next_page($order);
-      return TRUE;
-
+function commerce_westpac_payway_net_redirect_form_validate($order, $payment_method) {
+  // dpm(debug_backtrace());
+  commerce_nab_hosted_payment_callback_handler();
+  commerce_nab_hosted_payment_status_update($order);
+  commerce_nab_hosted_payment_transaction($payment_method, $order, COMMERCE_PAYMENT_STATUS_SUCCESS);
+  commerce_payment_redirect_pane_next_page($order);
+  return TRUE;
 }
-
-
-
 
 /**
  * Creates a payway payment transaction for the specified charge amount.
@@ -353,23 +292,20 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
  * @param $name
  *   The name entered on the submission form.
  */
+function commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $name) {
+  $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
+  $transaction->instance_id = $payment_method['instance_id'];
+  $transaction->amount = $charge['amount'];
+  $transaction->currency_code = $charge['currency_code'];
+  $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+  $transaction->message = 'Name: @name';
+  $transaction->message_variables = array('@name' => $name);
+  commerce_payment_transaction_save($transaction);
+}
 
-	function commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $name) {
-	  $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
-	  $transaction->instance_id = $payment_method['instance_id'];
-	  $transaction->amount = $charge['amount'];
-	  $transaction->currency_code = $charge['currency_code'];
-	  $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
-	  $transaction->message = 'Name: @name';
-	  $transaction->message_variables = array('@name' => $name);
-	  commerce_payment_transaction_save($transaction);
-	}
-	
-	
 /**
  * Saves the details for the successful transaction
  */
-
 /*
     function commerce_westpac_payway_net_transaction($payment_method, $order, $transaction_status) {
       dpm($order);
@@ -386,29 +322,25 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 
       commerce_payment_transaction_save($transaction);
     }
-
-
 */
 
 /**
  * URL RECEIVING THE DATA COMING BACK FROM WESTPAC
  * return callback - Implements hook_menu().
  */
-
-	function commerce_westpac_payway_net_menu() {
-	  $items['westpac-payway-net-server-response'] = array(
-	    'title' => t('Callback handler'),
-	    'page callback' => 'commerce_westpac_payway_net_callback_handler',
-	    'callback arguments' => array(1, 4),
-	    'type' => MENU_CALLBACK,
-	  );
-	}
+function commerce_westpac_payway_net_menu() {
+  $items['westpac-payway-net-server-response'] = array(
+    'title' => t('Callback handler'),
+    'page callback' => 'commerce_westpac_payway_net_callback_handler',
+    'callback arguments' => array(1, 4),
+    'type' => MENU_CALLBACK,
+  );
+}
 
 /**
  * URL RECEIVING THE DATA COMING BACK FROM WESTPAC
  * return callback - Implements hook_menu().
  */
-
 /*
 	function commerce_westpac_payway_net_menu() {
 	  $items['checkout/%/payment/return/%'] = array(
@@ -418,38 +350,29 @@ function commerce_westpac_payway_net_redirect_form($form, &$form_state, $order, 
 	    'type' => MENU_CALLBACK,
 	  );
 	}
-	
 	*/
 
 /**
  * CALL:BACK FUNCTION HANDLING THE DATA COMING BACK FROM WESTPAC
  * Callback handler, interprets query info in the successful payment return url which the bank hits.
  */
-
-	function commerce_westpac_payway_net_callback_handler() {
-	  parse_str($_SERVER['QUERY_STRING'], $data);
-	  dpm($data);
-
-	  $query_data = array(
-	    'commerce_westpac_payway_net_ret_bank_ref' => $data['bank_reference'],
-	    'commerce_westpac_payway_net_ret_bank_amt' => round($data['payment_amount']*100, 0),
-	    'commerce_westpac_payway_net_ret_bank_num' => $data['payment_number'],
-	  );
-
+function commerce_westpac_payway_net_callback_handler() {
+  parse_str($_SERVER['QUERY_STRING'], $data);
+  dpm($data);
+  $query_data = array(
+    'commerce_westpac_payway_net_ret_bank_ref' => $data['bank_reference'],
+    'commerce_westpac_payway_net_ret_bank_amt' => round($data['payment_amount']*100, 0),
+    'commerce_westpac_payway_net_ret_bank_num' => $data['payment_number'],
+  );
 	return $query_data;
-
-
-	}
+}
 
 /**
  * ORDER STATE
  * Implements hook_commerce_order_state_info().
  */
-
 function commerce_westpac_payway_net_commerce_order_state_info() {
-	
 	$order_states = array();
-
 	$order_states['finance'] = array(
 		'name' => 'finance',
 		'title' => t('Finance'),
@@ -457,35 +380,26 @@ function commerce_westpac_payway_net_commerce_order_state_info() {
 		'weight' => 0,
 		'default_status' => 'req_fin_confirm',
 	);
-
 	return $order_states;
-	
 }
-
-
 
 /**
  * ORDER STATUS
  * Implements hook_commerce_order_status_info().
  */
-
 function commerce_westpac_payway_net_commerce_order_status_info() {
 	$order_statuses = array();
-
 	$order_statuses['req_fin_confirm'] = array(
 		'name' => 'req_fin_confirm',
 		'title' => t('Requires Finance Confimation'),
 		'state' => 'finance',
 	);
-
 	$order_statuses['has_fin_confirm'] = array(
 		'name' => 'has_fin_confirm',
 		'title' => t('Payment Confirmed By Finance'),
 		'state' => 'finance',
 	);
-
 	return $order_statuses;
-	
 }
 
 
@@ -493,18 +407,11 @@ function commerce_westpac_payway_net_commerce_order_status_info() {
  * ORDER STATUS
  * updates the order status
  */
-
 function commerce_westpac_payway_net_status_update($order) {
-
 	// Load the order status object for the current order.
-
 	$order_status = commerce_order_status_load($order->status);
-    
 	// dpm($order_status);
-
-    if ($order_status['state'] == 'checkout' ) {
+  if ($order_status['state'] == 'checkout' ) {
 		$order = commerce_order_status_update($order, 'req_fin_confirm');
 	}
-	
 }
-
