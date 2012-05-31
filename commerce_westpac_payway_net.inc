@@ -78,7 +78,9 @@ function _commerce_westpac_payway_net_get_token($parameters) {
 }
 
 /**
- *
+ * Decrypt data returned in $_GET params when browser is redirected from PayWay Net. This lets us
+ * verify that the user viewing the return page is the one who made the transaction. Transaction
+ * completion is handled via the Notify callback, however.
  */
 function _commerce_payway_net_decrypt_parameters($encrytion_key, $encrypted_text, $signature) {
   $key = base64_decode($encrytion_key);
@@ -110,6 +112,9 @@ function _commerce_payway_net_decrypt_parameters($encrytion_key, $encrypted_text
   return $params;
 }
 
+/**
+ * Encrypted strings are padded, this reverses that.
+ */
 function _commerce_payway_net_pkcs5_unpad($text) {
   $pad = ord($text{strlen($text)-1});
   if ($pad > strlen($text)) return false;
