@@ -5,7 +5,7 @@
  *
  * Receives POST from PayWay Net with transaction details (encrypted).
  */
-function commerce_westpac_payway_net_notify_handler() {
+function commerce_payway_net_notify_handler() {
   parse_str($_SERVER['QUERY_STRING'], $data);
 
   // Get Order associated with this Transaction
@@ -36,12 +36,12 @@ function commerce_westpac_payway_net_notify_handler() {
   }
   
   // Authenticate notification using user/pass from payment method
-  if (!isset($method['settings']['commerce_westpac_payway_net_username']) || !isset($method['settings']['commerce_westpac_payway_net_password'])) {
+  if (!isset($method['settings']['commerce_payway_net_username']) || !isset($method['settings']['commerce_payway_net_password'])) {
     // no auth settings to check
     watchdog('commerce_payway_net', 'Authentication not configured for payment method @id.', array('@id' => $method['instance_id']), WATCHDOG_ERROR);
     drupal_access_denied();
   }
-  if ($_POST['username'] != $method['settings']['commerce_westpac_payway_net_username'] || $_POST['password'] != $method['settings']['commerce_westpac_payway_net_password']) {
+  if ($_POST['username'] != $method['settings']['commerce_payway_net_username'] || $_POST['password'] != $method['settings']['commerce_payway_net_password']) {
     // no auth settings to check
     watchdog('commerce_payway_net', 'Incorrect auth data submitted against order @ref.', array('@ref' => $_POST['payment_reference']), WATCHDOG_ERROR);
     drupal_access_denied();
@@ -52,7 +52,7 @@ function commerce_westpac_payway_net_notify_handler() {
   $_POST['am_payment'] = str_replace(',', '', $_POST['am_payment']);
 
   if ($_POST['fl_success'] == '1') {
-    $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
+    $transaction = commerce_payment_transaction_new('commerce_payway_net', $order->order_id);
     $transaction->instance_id = $method['instance_id'];
     $transaction->remote_id = $_POST['id_batch_entry'];
     $transaction->amount = $_POST['am_payment'] * 100;
@@ -62,7 +62,7 @@ function commerce_westpac_payway_net_notify_handler() {
   }
   else {
     watchdog('commerce_payway_net', 'Payment failure reported by PayWay Net for order @order_id', array('@order_id' => $order_id), WATCHDOG_ERROR);
-    $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
+    $transaction = commerce_payment_transaction_new('commerce_payway_net', $order->order_id);
     $transaction->instance_id = $method['instance_id'];
     $transaction->remote_id = $_POST['id_batch_entry'];
     $transaction->amount = $_POST['am_payment'] * 100;

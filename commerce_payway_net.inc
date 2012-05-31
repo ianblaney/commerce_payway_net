@@ -5,7 +5,7 @@
  *
  * Based on http://github.com/GiantRobot/uc_payway_net/
  */
-function _commerce_westpac_payway_net_get_token($parameters) {
+function _commerce_payway_net_get_token($parameters) {
   $cert_file = $parameters['cert_path'];
   $payway_base_url = $parameters['payway_url'];
   // Find the port setting, if any.
@@ -55,7 +55,7 @@ function _commerce_westpac_payway_net_get_token($parameters) {
   // Check the response for errors.
   $errnum = curl_errno($ch);
   if ($errnum != 0) {
-    watchdog('commerce_westpac_payway_net', 'cURL error getting token, Error %errnum, %errmsg', array('%errnum' => $errnum, '%errmsg' => curl_error($ch)), WATCHDOG_ERROR);
+    watchdog('commerce_payway_net', 'cURL error getting token, Error %errnum, %errmsg', array('%errnum' => $errnum, '%errmsg' => curl_error($ch)), WATCHDOG_ERROR);
     header("HTTP/1.1 403 " . $errmsg);
     exit;
   }
@@ -68,7 +68,7 @@ function _commerce_westpac_payway_net_get_token($parameters) {
     $rsp_parameters[$name] = $value;
   }
   if (array_key_exists('error', $rsp_parameters)) {
-    watchdog('commerce_westpac_payway_net', 'Error getting token: %err', array('%err' => $rsp_parameters['error']), WATCHDOG_ERROR);
+    watchdog('commerce_payway_net', 'Error getting token: %err', array('%err' => $rsp_parameters['error']), WATCHDOG_ERROR);
     throw new Exception(t('cURL error: %err', array('%err' => $rsp_parameters['error'])));
   }
   else {

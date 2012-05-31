@@ -10,7 +10,7 @@
  * ORDER STATUS
  * updates the order status
  */
-function commerce_westpac_payway_net_status_update($order) {
+function commerce_payway_net_status_update($order) {
   // Load the order status object for the current order.
   $order_status = commerce_order_status_load($order->status);
   // dpm($order_status);
@@ -22,7 +22,7 @@ function commerce_westpac_payway_net_status_update($order) {
 /**
  * Implements hook_commerce_order_state_info().
  */
-function commerce_westpac_payway_net_commerce_order_state_info() {
+function commerce_payway_net_commerce_order_state_info() {
   $order_states = array();
   $order_states['finance'] = array(
     'name' => 'finance',
@@ -38,7 +38,7 @@ function commerce_westpac_payway_net_commerce_order_state_info() {
  * ORDER STATUS
  * Implements hook_commerce_order_status_info().
  */
-function commerce_westpac_payway_net_commerce_order_status_info() {
+function commerce_payway_net_commerce_order_status_info() {
   $order_statuses = array();
   $order_statuses['req_fin_confirm'] = array(
     'name' => 'req_fin_confirm',
@@ -54,7 +54,7 @@ function commerce_westpac_payway_net_commerce_order_status_info() {
 }
 
 /*
-function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
+function commerce_payway_net_redirect_form_submit($payment_method, $pane_form, $pane_values, $order, $charge) {
   dpm(__LINE__, __FUNCTION__);
 
 }
@@ -64,13 +64,13 @@ function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane
  * Saves the details for the successful transaction
  */
 /*
-    function commerce_westpac_payway_net_transaction($payment_method, $order, $transaction_status) {
+    function commerce_payway_net_transaction($payment_method, $order, $transaction_status) {
       dpm($order);
       dpm($payment_method);
       dpm($transaction_status);
       $query_data = commerce_nab_hosted_payment_callback_handler();
 
-      $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
+      $transaction = commerce_payment_transaction_new('commerce_payway_net', $order->order_id);
       $transaction->instance_id = $payment_method['instance_id'];
       $transaction->remote_id = $query_data['commerce_nab_ret_bank_ref'];
       $transaction->amount = $query_data['commerce_nab_ret_bank_amt'];
@@ -86,10 +86,10 @@ function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane
  * return callback - Implements hook_menu().
  */
 /*
-  function commerce_westpac_payway_net_menu() {
+  function commerce_payway_net_menu() {
     $items['checkout/%/payment/return/%'] = array(
       'title' => t('Callback handler'),
-      'page callback' => 'commerce_westpac_payway_net_callback_handler',
+      'page callback' => 'commerce_payway_net_callback_handler',
       'callback arguments' => array(1, 4),
       'type' => MENU_CALLBACK,
     );
@@ -102,10 +102,10 @@ function commerce_westpac_payway_net_redirect_form_submit($payment_method, $pane
  * The module does nothing with these at this point. The will stay at checkout order state.
  */
 /*
-function commerce_westpac_payway_net_redirect_form_validate($order, $payment_method) {
+function commerce_payway_net_redirect_form_validate($order, $payment_method) {
   watchdog('commerce_payway_net', __FUNCTION__);
 //  dpm(__LINE__, __FUNCTION__);
-  module_load_include('inc', 'commerce_westpac_payway_net');
+  module_load_include('inc', 'commerce_payway_net');
   $return_link_url = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array(), array('absolute' => TRUE));
 
   // Throw an error if a long enough name was not provided.
@@ -139,9 +139,9 @@ function commerce_westpac_payway_net_redirect_form_validate($order, $payment_met
  *   The name entered on the submission form.
  */
 /*
-function commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $name) {
+function commerce_payway_net_transaction($payment_method, $order, $charge, $name) {
   error_log(__FUNCTION__);
-  $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
+  $transaction = commerce_payment_transaction_new('commerce_payway_net', $order->order_id);
   $transaction->instance_id = $payment_method['instance_id'];
   $transaction->amount = $charge['amount'];
   $transaction->currency_code = $charge['currency_code'];
