@@ -6,8 +6,8 @@
  *
  */
 
-module_load_include('inc', 'commerce_westpac_payway_net', 'commerce_westpac_payway_net.cruft');
 module_load_include('inc', 'commerce_westpac_payway_net', 'commerce_westpac_payway_net.forms');
+// module_load_include('inc', 'commerce_westpac_payway_net', 'commerce_westpac_payway_net.cruft');
 
 /**
  * Implements hook_menu().
@@ -123,45 +123,6 @@ function commerce_westpac_payway_net_settings_form($settings = NULL) {
     '#default_value' => $settings['commerce_westpac_payway_net_payWayBaseUrl'],
     '#required' => TRUE,
   );
-// dpm($form);
   return $form;
-}
-
-
-/**
- * Creates a payway payment transaction for the specified charge amount.
- *
- * @param $payment_method
- *   The payment method instance object used to charge this payment.
- * @param $order
- *   The order object the payment applies to.
- * @param $charge
- *   An array indicating the amount and currency code to charge.
- * @param $name
- *   The name entered on the submission form.
- */
-function commerce_westpac_payway_net_transaction($payment_method, $order, $charge, $name) {
-  error_log(__FUNCTION__);
-  $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
-  $transaction->instance_id = $payment_method['instance_id'];
-  $transaction->amount = $charge['amount'];
-  $transaction->currency_code = $charge['currency_code'];
-  $transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
-  $transaction->message = 'Name: @name';
-  $transaction->message_variables = array('@name' => $name);
-  commerce_payment_transaction_save($transaction);
-}
-
-/**
- * ORDER STATUS
- * updates the order status
- */
-function commerce_westpac_payway_net_status_update($order) {
-  // Load the order status object for the current order.
-  $order_status = commerce_order_status_load($order->status);
-  // dpm($order_status);
-  if ($order_status['state'] == 'checkout' ) {
-    $order = commerce_order_status_update($order, 'req_fin_confirm');
-  }
 }
 
