@@ -21,8 +21,6 @@ function commerce_payway_net_menu() {
     'access arguments' => array('access content'),
     'file' => 'commerce_payway_net.pages.inc',
   );
-  // PayWay is still pinging this URL, so here's a handler to stop it spamming the logs.
-  $items['westpac-payway-net-server-response'] = $items['checkout/payway_net_notify'];
   return $items;
 }
 
@@ -32,10 +30,10 @@ function commerce_payway_net_menu() {
 function commerce_payway_net_commerce_payment_method_info() {
   $payment_methods = array();
   $payment_methods['commerce_payway_net'] = array(
-    'title' => t('Pay by credit card via Westpac PayWay Net'),
-    'short_title' => t('Pay by credit card via Westpac PayWay Net'),
-    'display_title' => t('Pay by credit card via Westpac PayWay Net'),
-    'description' => t('Pay by credit card via Westpac PayWay Net'),
+    'title' => t('Pay by credit card via PayWay Net'),
+    'short_title' => t('Pay by credit card via PayWay Net'),
+    'display_title' => t('Pay by credit card via PayWay Net'),
+    'description' => t('Pay by credit card via PayWay Net'),
     'active' => TRUE,
     'terminal' => FALSE,
     'offsite' => TRUE,
@@ -109,7 +107,7 @@ function commerce_payway_net_settings_form($settings = NULL) {
   );
   $form['commerce_payway_net_paypalEmail'] = array(
     '#type' => 'textfield',
-    '#title' => t('Return link text'),
+    '#title' => t('PayPal email address'),
     '#size' => 80,
     '#description' => t('eg. test@example.com'),
     '#default_value' => $settings['commerce_payway_net_paypalEmail'],
@@ -117,7 +115,7 @@ function commerce_payway_net_settings_form($settings = NULL) {
   );
   $form['commerce_payway_net_payWayBaseUrl'] = array(
     '#type' => 'textfield',
-    '#title' => t('Return link text'),
+    '#title' => t('PayWay Base URL'),
     '#size' => 80,
     '#description' => t('eg. https://www.payway.com.au/'),
     '#default_value' => $settings['commerce_payway_net_payWayBaseUrl'],
@@ -146,9 +144,6 @@ function commerce_payway_net_submit_form($payment_method, $pane_values, $checkou
  */
 function commerce_payway_net_redirect_form($form, &$form_state, $order, $payment_method) {
   module_load_include('inc', 'commerce_payway_net');
-  watchdog('commerce_payway_net', __FUNCTION__);
-  $order->data['commerce_payway_net'] = $pane_values;
-  commerce_payway_net_transaction($payment_method, $order, $charge, $pane_values['name']);
   
   $return_link_url = url('checkout/' . $order->order_id . '/payment/return/' . $order->data['payment_redirect_key'], array(), array('absolute' => TRUE));
   // Commerce has price in cents, Payway wants dollars
