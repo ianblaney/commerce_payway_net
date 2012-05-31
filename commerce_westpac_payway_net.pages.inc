@@ -6,21 +6,7 @@
  * Receives POST from PayWay Net with transaction details (encrypted).
  */
 function commerce_westpac_payway_net_notify_handler() {
-  error_log(__FUNCTION__);
-  error_log('POST: '.print_r($_POST,1));
-  error_log('REQUEST: '.print_r($_REQUEST,1));
-  error_log('ARGS: '.print_r(func_get_args(),1));
   parse_str($_SERVER['QUERY_STRING'], $data);
-  
-  watchdog('commerce_payway_net', __FUNCTION__);
-  watchdog('commerce_payway_net', __LINE__);  
-  watchdog('commerce_payway_net', 'Post: <pre>!dbg</pre>', array('!dbg' => print_r($_POST,1)), WATCHDOG_DEBUG);
-  watchdog('commerce_payway_net', __LINE__);
-  watchdog('commerce_payway_net', 'Request: <pre>!dbg</pre>', array('!dbg' => print_r($_REQUEST,1)), WATCHDOG_DEBUG);
-  watchdog('commerce_payway_net', __LINE__);
-  $args = func_get_args();
-  watchdog('commerce_payway_net', 'Args: <pre>!dbg</pre>', array('!dbg' => print_r($args,1)), WATCHDOG_DEBUG);
-  watchdog('commerce_payway_net', __LINE__);
 
   // Get Order associated with this Transaction
   if (empty($_POST['payment_reference'])) {
@@ -36,8 +22,6 @@ function commerce_westpac_payway_net_notify_handler() {
     drupal_access_denied();
   }
 
-  watchdog('commerce_payway_net', 'Order: <pre>!order</pre>', array('!order' => print_r($order,1)), WATCHDOG_DEBUG);
-
   // Get Payment Method associated with Order
   if (!isset($order->data['payment_method'])) {
     // no payment method on order
@@ -51,8 +35,6 @@ function commerce_westpac_payway_net_notify_handler() {
     drupal_access_denied();
   }
   
-  watchdog('commerce_payway_net', 'Method: <pre>!method</pre>', array('!method' => print_r($payment_method,1)), WATCHDOG_DEBUG);
-
   // Authenticate notification using user/pass from payment method
   if (!isset($method['settings']['commerce_westpac_payway_net_username']) || !isset($method['settings']['commerce_westpac_payway_net_password'])) {
     // no auth settings to check
@@ -69,7 +51,6 @@ function commerce_westpac_payway_net_notify_handler() {
   // but there you have it.
   $_POST['am_payment'] = str_replace(',', '', $_POST['am_payment']);
 
-  watchdog('commerce_westpac_payway_net', 'Order (notify): <pre>!order</pre>', array('!order' => print_r($order,1)), WATCHDOG_DEBUG);
   if ($_POST['fl_success'] == '1') {
     $transaction = commerce_payment_transaction_new('commerce_westpac_payway_net', $order->order_id);
     $transaction->instance_id = $method['instance_id'];

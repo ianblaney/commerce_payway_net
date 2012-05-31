@@ -55,7 +55,6 @@ function _commerce_westpac_payway_net_get_token($parameters) {
   // Check the response for errors.
   $errnum = curl_errno($ch);
   if ($errnum != 0) {
-    error_log('Commerce PayWay Net saw cURL error: '. curl_error($ch));
     watchdog('commerce_westpac_payway_net', 'cURL error getting token, Error %errnum, %errmsg', array('%errnum' => $errnum, '%errmsg' => curl_error($ch)), WATCHDOG_ERROR);
     header("HTTP/1.1 403 " . $errmsg);
     exit;
